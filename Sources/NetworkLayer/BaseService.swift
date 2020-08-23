@@ -39,6 +39,8 @@ public class BaseService {
         dataTask.resume()
     }
 
+    public init() { }
+
 }
 
 @available(iOS 13, macOS 10.15, *)
