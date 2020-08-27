@@ -9,7 +9,7 @@
 import Combine
 import Foundation
 
-public class BaseService {
+open class BaseService {
 
     open func request<T: Decodable>(router: Router, completion: @escaping (Result<T, Error>) -> ()) {
         
