@@ -9,6 +9,10 @@
 import Combine
 import Foundation
 
+public enum SessionError: Error {
+    case unknownError
+}
+
 open class BaseService {
 
     open var configuration: URLSessionConfiguration
@@ -28,8 +32,12 @@ open class BaseService {
         let session = URLSession(configuration: configuration)
         let dataTask = session.dataTask(with: urlRequest) { data, response, error in
             
-            guard let data = data,  error == nil else {
-                completion(.failure(error!))
+            guard let data = data else {
+                if let sessionError = error {
+                    completion(.failure(sessionError))
+                } else {
+                    completion(.failure(SessionError.unknownError))
+                }
                 return
             }
 
