@@ -11,6 +11,8 @@ import Foundation
 
 open class BaseService {
 
+    open var configuration: URLSessionConfiguration
+
     open func request<T: Decodable>(router: Router, completion: @escaping (Result<T, Error>) -> ()) {
         
         var components = URLComponents()
@@ -23,23 +25,30 @@ open class BaseService {
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = router.method
         
-        let session = URLSession(configuration: .default)
+        let session = URLSession(configuration: configuration)
         let dataTask = session.dataTask(with: urlRequest) { data, response, error in
             
             guard let data = data,  error == nil else {
                 completion(.failure(error!))
                 return
             }
-            
-            let responseObject = try! JSONDecoder().decode(T.self, from: data)
-            
-            completion(.success(responseObject))
+
+            do {
+                let responseObject = try JSONDecoder().decode(T.self, from: data)
+
+                completion(.success(responseObject))
+            } catch {
+                completion(.failure(error))
+            }
+
             
         }
         dataTask.resume()
     }
 
-    public init() { }
+    public init(configuration: URLSessionConfiguration = .default) {
+        self.configuration = configuration
+    }
 
 }
 
