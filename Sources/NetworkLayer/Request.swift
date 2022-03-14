@@ -8,7 +8,8 @@
 
 import Foundation
 
-public protocol Router {
+public protocol Request {
+    associatedtype ResponseObject: Decodable
     var host: String { get }
     var path:String { get }
     var parameters: [URLQueryItem] { get }

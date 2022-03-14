@@ -17,7 +17,7 @@ open class BaseService {
 
     open var configuration: URLSessionConfiguration
 
-    open func request<T: Decodable>(router: Router, completion: @escaping (Result<T, Error>) -> ()) {
+    open func request<T: Request>(router: T, completion: @escaping (Result<T.ResponseObject, Error>) -> ()) {
         
         var components = URLComponents()
         components.scheme = "https"
@@ -42,7 +42,7 @@ open class BaseService {
             }
 
             do {
-                let responseObject = try JSONDecoder().decode(T.self, from: data)
+                let responseObject = try JSONDecoder().decode(T.ResponseObject.self, from: data)
 
                 completion(.success(responseObject))
             } catch {
@@ -63,7 +63,7 @@ open class BaseService {
 @available(iOS 13, macOS 10.15, *)
 extension BaseService {
 
-    open func requestPublisher<T: Decodable>(router: Router) -> AnyPublisher<T, Error> {
+    open func requestPublisher<T: Request>(router: T) -> AnyPublisher<T.ResponseObject, Error> {
         
         var components = URLComponents()
         components.scheme = "https"
@@ -71,13 +71,13 @@ extension BaseService {
         components.path = router.path
         components.queryItems = router.parameters
         
-        guard let url = components.url else { return Fail(outputType: T.self, failure: NSError()).eraseToAnyPublisher() }
+        guard let url = components.url else { return Fail(outputType: T.ResponseObject.self, failure: NSError()).eraseToAnyPublisher() }
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = router.method
         
         let pub = URLSession.shared.dataTaskPublisher(for: urlRequest)
             .map(\.data)
-            .decode(type: T.self, decoder: JSONDecoder())
+            .decode(type: T.ResponseObject.self, decoder: JSONDecoder())
             .eraseToAnyPublisher()
         return pub
     }
